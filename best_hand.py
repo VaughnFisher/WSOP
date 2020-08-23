@@ -10,8 +10,10 @@ def separate(d):
       left_hand.append(card)
     else:
       right_hand.append(card)
-  print("left_hand: ", left_hand)
-  print("right_hand: ", right_hand)
+  print()
+  print(len(left_hand), "cards found in Left Hand: ", left_hand)
+  print(len(right_hand), "cards found in Right Hand: ", right_hand)
+  print()
   
   hands = [" ".join(left_hand), " ".join(right_hand)]
   return hands
@@ -45,7 +47,7 @@ def straightflush(hand):
 def fourofakind(hand):
     allfaces = [f for f,s in hand]
     allftypes = set(allfaces)
-    if len(allftypes) != 2:
+    if len(allftypes) > 4:
         return False
     for f in allftypes:
         if allfaces.count(f) == 4:
@@ -57,31 +59,53 @@ def fourofakind(hand):
 def fullhouse(hand):
     allfaces = [f for f,s in hand]
     allftypes = set(allfaces)
-    if len(allftypes) != 2:
+    matches = [f for f in allftypes if allfaces.count(f) >= 2]
+    if len(matches) < 2:
         return False
-    for f in allftypes:
-        if allfaces.count(f) == 3:
-            allftypes.remove(f)
-            return '6 full-house', [f, allftypes.pop()]
+    if len(matches) == 3:
+      p0, p1, p2 = matches
     else:
-        return False
+      p0, p1 = matches
+
+    for f in matches:
+        if matches.count(f) == 3:
+            matches.remove(f)
+            return '6 full-house', [f, allftypes.pop()]
+        else:
+            return False
  
 def flush(hand):
-    allstypes = {s for f, s in hand}
-    if len(allstypes) == 1:
-        allfaces = [f for f,s in hand]
+    allstypes = [s for f, s in hand]
+    type_freq = {}
+    for i in allstypes:
+      if i in type_freq: 
+        type_freq[i] += 1
+      else: 
+        type_freq[i] = 1
+
+    for k,v in type_freq.items():
+      if(v >= 5):
+
+        allfaces = [f for f,s in hand if s==k]
         return '5 flush', sorted(allfaces,
                                key=lambda f: face.index(f),
                                reverse=True)
+
     return False
  
 def straight(hand):
     f,fs = ( (lowace, lowaces) if any(card.face == '2' for card in hand)
              else (face, faces) )
-    ordered = sorted(hand, key=lambda card: (f.index(card.face), card.suit))
-    first, rest = ordered[0], ordered[1:]
-    if ' '.join(card.face for card in ordered) in fs:
-        return '4 straight', ordered[-1].face
+    allfaces = [f for f,s in hand]   
+    allftypes = set(allfaces)
+    allftypes2 = list(allftypes)
+    ordered = sorted(allftypes2, key=lambda card: f.index(card))
+
+    for i in range(len(ordered)-4):
+      ordered1 = ordered[i:5+i]
+      first, rest = ordered1[0], ordered1[1:]
+      if ' '.join(card for card in ordered1) in fs:
+          return '4 straight', ordered1[-1]
     return False
  
 def threeofakind(hand):
@@ -101,12 +125,15 @@ def threeofakind(hand):
  
 def twopair(hand):
     allfaces = [f for f,s in hand]
-    allftypes = set(allfaces)
+    allftypes = sorted(set(allfaces),key=lambda x: face.index(x))
     pairs = [f for f in allftypes if allfaces.count(f) == 2]
-    if len(pairs) != 2:
+    if len(pairs) < 2:
         return False
-    p0, p1 = pairs
-    other = [(allftypes - set(pairs)).pop()]
+    if len(pairs) == 3:
+      p0, p1, p2 = pairs
+    else:
+      p0, p1 = pairs
+    other = [[x for x in allfaces if x not in pairs].pop()]
     return '2 two-pair', pairs + other if face.index(p0) > face.index(p1) else pairs[::-1] + other
  
 def onepair(hand):
@@ -146,8 +173,7 @@ def handy(cards='2♥ 2♦ 2♣ k♣ q♦'):
         assert f in face, "Invalid: Don't understand card face %r" % f
         assert s in suit, "Invalid: Don't understand card suit %r" % s
         hand.append(Card(f, s))
-    assert len(hand) == 7, "Invalid: Must be 5 cards in a hand, not %i" % len(hand)
-    assert len(set(hand)) == 7, "Invalid: All cards in the hand must be unique %r" % cards
+    #assert len(hand) <= 7, ("Invalid: no more than 7 cards in a hand, there were %i" % len(hand))
     return hand
  
 '''
