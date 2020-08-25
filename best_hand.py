@@ -62,17 +62,17 @@ def fullhouse(hand):
     matches = [f for f in allftypes if allfaces.count(f) >= 2]
     if len(matches) < 2:
         return False
-    if len(matches) == 3:
-      p0, p1, p2 = matches
-    else:
-      p0, p1 = matches
+
+    print("allfaces: ", allfaces)
+    print("allftypes: ", allftypes)
+    print("matches: ", matches)
 
     for f in matches:
-        if matches.count(f) == 3:
+        if allfaces.count(f) == 3:
             matches.remove(f)
-            return '6 full-house', [f, allftypes.pop()]
-        else:
-            return False
+            print(matches)
+            return '6 full-house', [f, matches.pop()]
+    return False
  
 def flush(hand):
     allstypes = [s for f, s in hand]

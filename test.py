@@ -9,9 +9,7 @@ from datetime import datetime
 
 def play():
   startTime = datetime.now()
-  print(startTime)
   results = imagesearch_from_folder("./dbcards/", 0.95) #0.95
-  print(datetime.now() - startTime)
   print()
   if(len(results)<=7):
     print("TRYING AGAIN!")
@@ -52,8 +50,6 @@ def play():
 
   rand = random.randint(-10,10)
 
-  print(datetime.now() - startTime)
-
   if(left[0] > right[0]):
     print("*** LEFT WINS ***")
     pyautogui.click(x=450+rand, y=450+rand)
@@ -72,14 +68,15 @@ def play():
   print(datetime.now() - startTime)
 
 def wait():
+  startTime = datetime.now()
   im = pyautogui.screenshot(region=(610,190,120,155))
 
-  pos = imagesearcharea("back.png", 610, 190, 730, 345, 0.6, im)
-
+  pos = imagesearcharea(back_of_card, 610, 190, 730, 345, 0.6, im)
+  print("waiting...")
   while pos[0] == -1:
-    print("waiting")
     im = pyautogui.screenshot(region=(610,190,120,155))
-    pos = imagesearcharea("back.png", 610, 190, 730, 345, 0.6, im)
+    pos = imagesearcharea(back_of_card, 610, 190, 730, 345, 0.6, im)
+  print(datetime.now() - startTime)
   return
 
 def main():
@@ -87,10 +84,23 @@ def main():
     while True:
       play()
       wait()
-      time.sleep(0.55)
+      time.sleep(0.6)
   except KeyboardInterrupt:
     pass
 
+back_of_card = ""
+
+
+if len(sys.argv) < 2:
+  print("Enter db or dbx as mode")
+  exit()
+if(sys.argv[1]=="db"):
+  back_of_card = "back.png"
+elif(sys.argv[1]=="dbx"):
+  back_of_card = "xback.png"
+else:
+  print("Invalid mode")
+  exit()
 if __name__ == "__main__":
   main()
       
